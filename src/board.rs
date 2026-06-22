@@ -39,7 +39,7 @@ impl fmt::Display for Piece {
 pub struct Board {
     white_pawns: u64,
     white_knights: u64,
-    white_bishiops: u64,
+    white_bishops: u64,
     white_rooks: u64,
     white_queens: u64,
     white_king: u64,
@@ -53,15 +53,15 @@ pub struct Board {
 
 impl Board {
     fn set_piece(&mut self, piece: Piece, square: usize){
-        let symbol=match(piece.color, piece.kind) {
+        match(piece.color, piece.kind) {
             (Color:: White, Kind::Pawn) => self.white_pawns |= 1u64 << square,
-            (Color:: White, Kind::Bishop) => self.white_bishiops |= 1u64 << square,
+            (Color:: White, Kind::Bishop) => self.white_bishops |= 1u64 << square,
             (Color:: White, Kind::Knight) => self.white_knights |= 1u64 << square,
             (Color:: White, Kind::Rook) => self.white_rooks |= 1u64 << square,
             (Color:: White, Kind::Queen) => self.white_queens |= 1u64 << square,
             (Color:: White, Kind::King) => self.white_king |= 1u64 << square,
             (Color:: Black, Kind::Pawn) => self.black_pawns |= 1u64 << square,
-            (Color:: Black, Kind::Bishop) => self.black_bishiops |= 1u64 << square,
+            (Color:: Black, Kind::Bishop) => self.black_bishops |= 1u64 << square,
             (Color:: Black, Kind::Knight) => self.black_knights |= 1u64 << square,
             (Color:: Black, Kind::Rook) => self.black_rooks |= 1u64 << square,
             (Color:: Black, Kind::Queen) => self.black_queens |= 1u64 << square,
@@ -69,15 +69,15 @@ impl Board {
         }
     }
     fn clear_piece(&mut self, piece: Piece, square: usize){
-        let symbol=match(piece.color, piece.kind) {
+        match(piece.color, piece.kind) {
             (Color:: White, Kind::Pawn) => self.white_pawns &= !(1u64 << square),
-            (Color:: White, Kind::Bishop) => self.white_bishiops &= !(1u64 << square),
+            (Color:: White, Kind::Bishop) => self.white_bishops &= !(1u64 << square),
             (Color:: White, Kind::Knight) => self.white_knights &= !(1u64 << square),
             (Color:: White, Kind::Rook) => self.white_rooks &= !(1u64 << square),
             (Color:: White, Kind::Queen) => self.white_queens &= !(1u64 << square),
             (Color:: White, Kind::King) => self.white_king &= !(1u64 << square),
             (Color:: Black, Kind::Pawn) => self.black_pawns &= !(1u64 << square),
-            (Color:: Black, Kind::Bishop) => self.black_bishiops &= !(1u64 << square),
+            (Color:: Black, Kind::Bishop) => self.black_bishops &= !(1u64 << square),
             (Color:: Black, Kind::Knight) => self.black_knights &= !(1u64 << square),
             (Color:: Black, Kind::Rook) => self.black_rooks &= !(1u64 << square),
             (Color:: Black, Kind::Queen) => self.black_queens &= !(1u64 << square),
@@ -86,67 +86,99 @@ impl Board {
     }
     //let is_white_pawn_here = self.white_pawns & (1u64 << square) != 0;
     fn piece_at_square(&self, square: usize) -> Option<Piece>{
-        if (self.white_pawns & (1u64 << square !=0)) {
+        if (self.white_pawns & (1u64 << square)) !=0 {
             Some(Piece { color: Color::White, kind: Kind::Pawn})
-        } else if (self.white_knights & (1u64 << square) !=0) {
+        } else if (self.white_knights & (1u64 << square)) !=0 {
             Some(Piece { color: Color::White, kind: Kind::Knight})
-        } else if (self.white_bishiops & (1u64 << square) !=0) {
+        } else if (self.white_bishops & (1u64 << square)) !=0 {
             Some(Piece { color: Color::White, kind: Kind::Bishop})
-        } else if (self.white_rooks & (1u64 << square) !=0) {
+        } else if (self.white_rooks & (1u64 << square)) !=0 {
             Some(Piece { color: Color::White, kind: Kind::Rook})
-        } else if (self.white_queens & (1u64 << square) !=0) {
+        } else if (self.white_queens & (1u64 << square)) !=0 {
             Some(Piece { color: Color::White, kind: Kind::Queen})
-        } else if (self.white_king & (1u64 << square) !=0) {
+        } else if (self.white_king & (1u64 << square)) !=0 {
             Some(Piece { color: Color::White, kind: Kind::King})
-        } if (self.black_pawns & (1u64 << square !=0)) {
+        } else if (self.black_pawns & (1u64 << square)) !=0 {
             Some(Piece { color: Color::Black, kind: Kind::Pawn})
-        } else if (self.black_knights & (1u64 << square) !=0) {
+        } else if (self.black_knights & (1u64 << square)) !=0 {
             Some(Piece { color: Color::Black, kind: Kind::Knight})
-        } else if (self.black_bishiops & (1u64 << square) !=0) {
+        } else if (self.black_bishops & (1u64 << square)) !=0 {
             Some(Piece { color: Color::Black, kind: Kind::Bishop})
-        } else if (self.black_rooks & (1u64 << square) !=0) {
+        } else if (self.black_rooks & (1u64 << square)) !=0 {
             Some(Piece { color: Color::Black, kind: Kind::Rook})
-        } else if (self.black_queens & (1u64 << square) !=0) {
+        } else if (self.black_queens & (1u64 << square)) !=0 {
             Some(Piece { color: Color::Black, kind: Kind::Queen})
-        } else if (self.black_king & (1u64 << square) !=0) {
+        } else if (self.black_king & (1u64 << square)) !=0 {
             Some(Piece { color: Color::Black, kind: Kind::King})
+        } else {
+            None
         }
     }
 }
 
-pub fn new_board()->Board{
-    let mut board:Board  = vec![None; 64];
-    let back_rank= [Kind::Rook, Kind::Knight, Kind::Bishop, Kind::Queen, Kind::King, Kind::Bishop, Kind:: Knight, Kind::Rook];
-    
+pub fn new_board() -> Board {
+    let mut board = Board {
+        white_pawns: 0,
+        white_knights: 0,
+        white_bishops: 0,
+        white_rooks: 0,
+        white_queens: 0,
+        white_king: 0,
+
+        black_pawns: 0,
+        black_knights: 0,
+        black_bishops: 0,
+        black_rooks: 0,
+        black_queens: 0,
+        black_king: 0,
+    };
+
+    let back_rank = [
+        Kind::Rook,
+        Kind::Knight,
+        Kind::Bishop,
+        Kind::Queen,
+        Kind::King,
+        Kind::Bishop,
+        Kind::Knight,
+        Kind::Rook,
+    ];
+
     for (i, kind) in back_rank.into_iter().enumerate() {
-        board[i]      = Some(Piece { color: Color::White, kind: kind.clone() });
-        board[8 + i]  = Some(Piece { color: Color::White, kind: Kind::Pawn });
-        board[48 + i] = Some(Piece { color: Color::Black, kind: Kind::Pawn });
-        board[56 + i] = Some(Piece { color: Color::Black, kind });
+        board.set_piece(Piece { color: Color::White, kind: kind.clone() }, i);
+        board.set_piece(Piece { color: Color::White, kind: Kind::Pawn }, 8 + i);
+
+        board.set_piece(Piece { color: Color::Black, kind: Kind::Pawn }, 48 + i);
+        board.set_piece(Piece { color: Color::Black, kind }, 56 + i);
     }
 
     board
 }
 
-pub fn print_board(board: &Board){
-    println!(" |{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|", "a", "b", "c", "d", "e", "f", "g", "h");
-    println!("{}","-".repeat(34));
+pub fn print_board(board: &Board) {
+    println!(" |{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|",
+             "a", "b", "c", "d", "e", "f", "g", "h");
+    println!("{}", "-".repeat(34));
 
-    for i in (0..8).rev(){
-        print!("{}|",i+1);
-        for j in 0..8 {
-            let cell = match &board[i * 8 + j] {
+    for rank in (0..8).rev() {
+        print!("{}|", rank + 1);
+
+        for file in 0..8 {
+            let square = rank * 8 + file;
+
+            let cell = match board.piece_at_square(square) {
                 Some(piece) => format!("{}", piece),
-                None        => " ".to_string(),
+                None => " ".to_string(),
             };
+
             print!("{:^3}|", cell);
         }
-        println!{};
-        println!("{}","-".repeat(34));
+
+        println!();
+        println!("{}", "-".repeat(34));
     }
-    println!(" |{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|", "a", "b", "c", "d", "e", "f", "g", "h");
-    println!("{}","-".repeat(34));
 
-
+    println!(" |{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|{:^3}|",
+             "a", "b", "c", "d", "e", "f", "g", "h");
 }
 
