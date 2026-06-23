@@ -52,7 +52,7 @@ pub struct Board {
 }
 
 impl Board {
-    fn set_piece(&mut self, piece: Piece, square: usize){
+    pub fn set_piece(&mut self, piece: Piece, square: usize){
         match(piece.color, piece.kind) {
             (Color:: White, Kind::Pawn) => self.white_pawns |= 1u64 << square,
             (Color:: White, Kind::Bishop) => self.white_bishops |= 1u64 << square,
@@ -68,7 +68,7 @@ impl Board {
             (Color:: Black, Kind::King) => self.black_king |= 1u64 << square,
         }
     }
-    fn clear_piece(&mut self, piece: Piece, square: usize){
+    pub fn clear_piece(&mut self, piece: Piece, square: usize){
         match(piece.color, piece.kind) {
             (Color:: White, Kind::Pawn) => self.white_pawns &= !(1u64 << square),
             (Color:: White, Kind::Bishop) => self.white_bishops &= !(1u64 << square),
@@ -85,7 +85,7 @@ impl Board {
         }
     }
     //let is_white_pawn_here = self.white_pawns & (1u64 << square) != 0;
-    fn piece_at_square(&self, square: usize) -> Option<Piece>{
+    pub fn piece_at_square(&self, square: usize) -> Option<Piece>{
         if (self.white_pawns & (1u64 << square)) !=0 {
             Some(Piece { color: Color::White, kind: Kind::Pawn})
         } else if (self.white_knights & (1u64 << square)) !=0 {
