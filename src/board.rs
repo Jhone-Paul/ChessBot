@@ -2,7 +2,7 @@
 use std::fmt;
 
 #[derive(Clone)]
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum Color {White, Black}
 
 #[derive(Clone)]

@@ -1,6 +1,8 @@
 use crate::board::Board;
 use crate::board::Color;
 use crate::board::Kind;
+use crate::board::Piece;
+
 const DEBUG: bool= true;
 //takes in a chess square (like e4) and returns the bitstring of that peice.
 pub fn parse_square(s:&str) -> usize {
@@ -57,61 +59,60 @@ fn rank_file_to_square(rank: i32, file: i32) -> Option<usize> {
 fn square_to_rank_file(sq: usize) -> (i32, i32) {
     ((sq / 8) as i32, (sq % 8) as i32)
 }
-
-fn generate_pawn_moves(board: &Board, sq: usize, color: &Color, moves: &mut Vec<(usize, usize)>) {
+fn generate_pawn_moves(board: &Board, sq: usize, color: &Color, moves: &mut Vec<(usize, usize, Piece)>) {
     let (rank, file) = square_to_rank_file(sq);
     let (dir, start_rank) = match color {
         Color::White => (1, 1),
         Color::Black => (-1, 6),
     };
+    let piece = Piece { color: color.clone(), kind: Kind::Pawn };
 
-    // normal shmoove
     if let Some(target) = rank_file_to_square(rank + dir, file) {
         if board.piece_at_square(target).is_none() {
-            moves.push((sq, target));
+            moves.push((sq, target, piece.clone()));
 
-            // in passing (i refuse to sue french)
             if rank == start_rank {
                 if let Some(target2) = rank_file_to_square(rank + 2 * dir, file) {
                     if board.piece_at_square(target2).is_none() {
-                        moves.push((sq, target2));
+                        moves.push((sq, target2, piece.clone()));
                     }
                 }
             }
         }
     }
 
-    // diagonal captures
     for df in [-1, 1] {
         if let Some(target) = rank_file_to_square(rank + dir, file + df) {
             if let Some(p) = board.piece_at_square(target) {
                 if p.color != *color {
-                    moves.push((sq, target));
+                    moves.push((sq, target, piece.clone()));
                 }
             }
         }
     }
 }
 
-fn generate_knight_moves(board: &Board, sq: usize, color: &Color, moves: &mut Vec<(usize, usize)>) {
+fn generate_knight_moves(board: &Board, sq: usize, color: &Color, moves: &mut Vec<(usize, usize, Piece)>) {
     let (rank, file) = square_to_rank_file(sq);
+    let piece = Piece { color: color.clone(), kind: Kind::Knight };
     for (dr, df) in KNIGHT_DELTAS {
         if let Some(target) = rank_file_to_square(rank + dr, file + df) {
             match board.piece_at_square(target) {
                 Some(p) if p.color == *color => {}
-                _ => moves.push((sq, target)),
+                _ => moves.push((sq, target, piece.clone())),
             }
         }
     }
 }
 
-fn generate_king_moves(board: &Board, sq: usize, color: &Color, moves: &mut Vec<(usize, usize)>) {
+fn generate_king_moves(board: &Board, sq: usize, color: &Color, moves: &mut Vec<(usize, usize, Piece)>) {
     let (rank, file) = square_to_rank_file(sq);
+    let piece = Piece { color: color.clone(), kind: Kind::King };
     for (dr, df) in KING_DELTAS {
         if let Some(target) = rank_file_to_square(rank + dr, file + df) {
             match board.piece_at_square(target) {
                 Some(p) if p.color == *color => {}
-                _ => moves.push((sq, target)),
+                _ => moves.push((sq, target, piece.clone())),
             }
         }
     }
@@ -121,19 +122,21 @@ fn generate_sliding_moves(
     board: &Board,
     sq: usize,
     color: &Color,
+    kind: Kind,
     dirs: &[(i32, i32)],
-    moves: &mut Vec<(usize, usize)>,
+    moves: &mut Vec<(usize, usize, Piece)>,
 ) {
     let (rank, file) = square_to_rank_file(sq);
+    let piece = Piece { color: color.clone(), kind };
     for (dr, df) in dirs {
         let mut r = rank + dr;
         let mut f = file + df;
         while let Some(target) = rank_file_to_square(r, f) {
             match board.piece_at_square(target) {
-                None => moves.push((sq, target)),
+                None => moves.push((sq, target, piece.clone())),
                 Some(p) => {
                     if p.color != *color {
-                        moves.push((sq, target));
+                        moves.push((sq, target, piece.clone()));
                     }
                     break;
                 }
@@ -144,7 +147,7 @@ fn generate_sliding_moves(
     }
 }
 
-pub fn get_legal_moves(board: &Board, color: Color) -> Vec<(usize, usize)> {
+pub fn get_legal_moves(board: &Board, color: Color) -> Vec<(usize, usize, Piece)> {
     let mut moves = Vec::new();
 
     for sq in 0..64 {
@@ -153,9 +156,9 @@ pub fn get_legal_moves(board: &Board, color: Color) -> Vec<(usize, usize)> {
                 match piece.kind {
                     Kind::Pawn => generate_pawn_moves(board, sq, &color, &mut moves),
                     Kind::Knight => generate_knight_moves(board, sq, &color, &mut moves),
-                    Kind::Bishop => generate_sliding_moves(board, sq, &color, &BISHOP_DIRS, &mut moves),
-                    Kind::Rook => generate_sliding_moves(board, sq, &color, &ROOK_DIRS, &mut moves),
-                    Kind::Queen => generate_sliding_moves(board, sq, &color, &QUEEN_DIRS, &mut moves),
+                    Kind::Bishop => generate_sliding_moves(board, sq, &color, Kind::Bishop, &BISHOP_DIRS, &mut moves),
+                    Kind::Rook => generate_sliding_moves(board, sq, &color, Kind::Rook, &ROOK_DIRS, &mut moves),
+                    Kind::Queen => generate_sliding_moves(board, sq, &color, Kind::Queen, &QUEEN_DIRS, &mut moves),
                     Kind::King => generate_king_moves(board, sq, &color, &mut moves),
                 }
             }
@@ -164,3 +167,4 @@ pub fn get_legal_moves(board: &Board, color: Color) -> Vec<(usize, usize)> {
 
     moves
 }
+
